@@ -9,29 +9,65 @@ Create a JavaScript function `calculateTax` that accurately determines income ta
    - Ensure no slab has an invalid range (e.g., `start` ≥ `end`).
    - Throw an error if the slabs do not fully cover the income (e.g., remaining income after processing all slabs is still positive).
 
-**Example Test Cases:**
-```javascript
-// Test 1: Income 150000
-calculateTax(150000, [
-  { start: 100001, end: 500000, p: 2 }, // Slab 2
-  { start: 0, end: 100000, p: 0 },      // Slab 1 (sorted first)
-]);
-// Output: 1000 (taxed 50000 * 2%)
+**Solution:**
+function calculate_tax(income, tax_slabs) {
+    if (income <= 0 || !Array.isArray(tax_slabs) || tax_slabs.length === 0) {
+        throw new Error('Invalid income or tax slabs');
+    }
 
-// Test 2: Income 400000
-calculateTax(400000, [
-  { start: 0, end: 100000, p: 0 },
-  { start: 100001, end: 300000, p: 1 },
-  { start: 300001, end: 500000, p: 2 },
-]);
-// Output: 2000 + 2000 = 4000 (taxed 200000*1% + 100000*2%)
+    const sortedSlabs = tax_slabs.sort((a, b) => a.start - b.start);
 
-// Test 3: Income 600000 with incomplete slabs
-calculateTax(600000, [
-  { start: 0, end: 300000, p: 0 },
-  { start: 300001, end: 500000, p: 1 },
-]);
-// Throws Error: "Insufficient slabs to cover income"
-```
+    let tax = 0;
+    let remainingIncome = income;
 
-**Provide the function implementation that meets these criteria.**
+    for (const slab of sortedSlabs) {
+        const { start, end, p: percentage } = slab;
+
+        if (remainingIncome <= 0) break;
+
+        if (start >= end) throw new Error('Invalid slab range');
+
+        const slabRange = end - start;
+
+        const taxableAmount = Math.min(remainingIncome, slabRange);
+
+        tax += (taxableAmount * percentage) / 100;
+
+        remainingIncome -= taxableAmount;
+    }
+
+    if (remainingIncome > 0) {
+        throw new Error('Insufficient slabs to cover income');
+    }
+
+    return tax;
+}
+// Test case 1
+try {
+    console.log(
+        calculate_tax(150000, [
+            { start: 0, end: 100000, p: 0 },
+            { start: 100001, end: 500000, p: 2 },
+        ])
+    );
+
+    // Test case 2
+    console.log(
+        calculate_tax(400000, [
+            { start: 0, end: 100000, p: 0 },
+            { start: 100001, end: 300000, p: 1 },
+            { start: 300001, end: 500000, p: 2 },
+        ])
+    );
+
+    // Test case 3
+    console.log(
+        calculate_tax(600000, [
+            { start: 0, end: 300000, p: 0 },
+            { start: 300001, end: 500000, p: 1 },
+        ])
+    );
+
+} catch (err) {
+    console.error(err.message);
+}
