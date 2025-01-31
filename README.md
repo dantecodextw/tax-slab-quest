@@ -10,6 +10,7 @@ Create a JavaScript function `calculateTax` that accurately determines income ta
    - Throw an error if the slabs do not fully cover the income (e.g., remaining income after processing all slabs is still positive).
 
 **Solution:**
+```
 function calculate_tax(income, tax_slabs) {
     if (income <= 0 || !Array.isArray(tax_slabs) || tax_slabs.length === 0) {
         throw new Error('Invalid income or tax slabs');
@@ -71,3 +72,4 @@ try {
 } catch (err) {
     console.error(err.message);
 }
+```
